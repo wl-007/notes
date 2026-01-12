@@ -1,0 +1,1 @@
+import{d as t,p as a,c as s,o as c,j as o,t as l}from"./framework.B1jFR3yW.js";const _=t({__name:"EventDemo",setup(r){const e=a(0),n=()=>{console.log("++"),e.value++};return(u,i)=>(c(),s("div",null,[o("button",{onClick:n},"按钮++"),o("div",null,l(e.value),1)]))}});export{_ as default};

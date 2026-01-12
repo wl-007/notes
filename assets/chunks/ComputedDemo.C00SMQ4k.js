@@ -1,0 +1,1 @@
+import{d as s,p as u,h as r,c as l,o as c,j as n,t as o,F as p}from"./framework.B1jFR3yW.js";const f=s({__name:"ComputedDemo",setup(m){const e=u(0),a=r(()=>e.value+100);return(i,t)=>(c(),l(p,null,[n("h1",null,o(a.value),1),n("button",{onClick:t[0]||(t[0]=d=>e.value++)},"count is: "+o(e.value),1)],64))}});export{f as default};

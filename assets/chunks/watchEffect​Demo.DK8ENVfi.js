@@ -1,0 +1,1 @@
+import{d as o,p as n,s as a,c as s,o as c,t as l}from"./framework.B1jFR3yW.js";const i=o({__name:"watchEffect​Demo",setup(r){const e=n(0);return a(()=>{console.log(`Count is: ${e.value}`)}),(f,t)=>(c(),s("div",{onClick:t[0]||(t[0]=p=>e.value++)},l(e.value),1))}});export{i as default};

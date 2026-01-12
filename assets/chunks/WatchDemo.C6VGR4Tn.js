@@ -1,0 +1,1 @@
+import{d as a,p as n,q as s,c as r,o as c,j as l,t as u}from"./framework.B1jFR3yW.js";const d=a({__name:"WatchDemo",setup(i){const t=n(0);return s(()=>t.value,(o,e)=>{console.log(o,e)},{deep:!0,immediate:!0}),(o,e)=>(c(),r("div",null,[l("button",{onClick:e[0]||(e[0]=p=>t.value++)},"count is: "+u(t.value),1)]))}});export{d as default};
