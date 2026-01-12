@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: WangLei
-  tagline: 只要坚持自己的目标，没有什么不可能
+  tagline: 夜晚越黑暗，星星就越明亮
 
 features:
   # - title: 笔记
