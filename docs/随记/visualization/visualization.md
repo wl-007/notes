@@ -886,4 +886,5 @@ module.exports = {
 配置生效后，原有的代码中px在编译阶段被自动实时转换成vw视口单位，DOM元素与视口大小等比例缩放
 
 
-
+### vue3 开源 
+[IofTV-Screen-Vue3](https://github.com/daidaibg/IofTV-Screen-Vue3)   可以单独裁处 scale-screen 组件使用
