@@ -1,0 +1,1 @@
+import{_ as i,c as a,o as t,ag as e}from"./chunks/framework.B1jFR3yW.js";const r=JSON.parse('{"title":"uv 使用指南","description":"","frontmatter":{},"headers":[],"relativePath":"工具/py/uv.md","filePath":"工具/py/uv.md"}'),h={name:"工具/py/uv.md"};function l(n,s,p,d,k,o){return t(),a("div",null,[...s[0]||(s[0]=[e("",72)])])}const F=i(h,[["render",l]]);export{r as __pageData,F as default};
