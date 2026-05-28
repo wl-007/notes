@@ -1,0 +1,1 @@
+import{_ as e,c as l,o as i,ag as t}from"./chunks/framework.B1jFR3yW.js";const _=JSON.parse('{"title":"计划","description":"","frontmatter":{},"headers":[],"relativePath":"计划/index.md","filePath":"计划/index.md"}'),r={name:"计划/index.md"};function o(n,a,h,d,s,u){return i(),l("div",null,[...a[0]||(a[0]=[t("",11)])])}const f=e(r,[["render",o]]);export{_ as __pageData,f as default};
