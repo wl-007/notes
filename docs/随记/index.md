@@ -6,6 +6,9 @@ hero:
   tagline: 自己的一些潦草笔记
   actions:
     - theme: brand
+      text: 计划
+      link: ./计划/
+    - theme: brand
       text: HTML
       link: ./HTML/html5
     - theme: alt
@@ -40,4 +43,3 @@ hero:
       link: ./uniApp/uni-app
 
 ---
-

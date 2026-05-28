@@ -13,31 +13,35 @@ def show(title):
 
 
 def main():
-    show("1. 创建数组")
-    arr = np.array([1, 2, 3, 4])
-    print(arr)
+    # show("1. 创建数组")
+    # arr = np.array([1, 2, 3, 4])
+    # print(arr)
+    # print(arr.ndim)
+    # print("shape:", arr.shape)
+    # print("dtype:", arr.dtype)
 
     show("2. 形状和类型")
-    matrix = np.arange(12).reshape(3, 4)
+    matrix = np.zeros(12, dtype= np.int8).reshape(3, 4)
     print(matrix)
     print("shape:", matrix.shape)
     print("dtype:", matrix.dtype)
+    print("size:", matrix.size)
 
-    show("3. 向量化运算")
-    print(arr + 10)
-    print(arr * 2)
-    print(arr > 2)
+    # show("3. 向量化运算")
+    # print(arr + 10)
+    # print(arr * 2)
+    # print(arr > 2)
 
-    show("4. 统计函数")
-    print("sum:", arr.sum())
-    print("mean:", arr.mean())
-    print("max:", arr.max())
+    # show("4. 统计函数")
+    # print("sum:", arr.sum())
+    # print("mean:", arr.mean())
+    # print("max:", arr.max())
 
-    show("5. 矩阵乘法")
-    a = np.array([[1, 2], [3, 4]])
-    b = np.array([[5, 6], [7, 8]])
-    print("逐元素相乘:\n", a * b)
-    print("矩阵乘法:\n", a @ b)
+    # show("5. 矩阵乘法")
+    # a = np.array([[1, 2], [3, 4]])
+    # b = np.array([[5, 6], [7, 8]])
+    # print("逐元素相乘:\n", a * b)
+    # print("矩阵乘法:\n", a @ b)
 
 
 if __name__ == "__main__":
