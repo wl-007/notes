@@ -40,11 +40,11 @@
 
 对应工具链文档：
 
-- [Python 包管理与环境](../../../python/包管理与环境/index.md)
-- [uv 使用指南](../../../python/包管理与环境/uv.md)
-- [conda 使用指南](../../../python/包管理与环境/conda.md)
-- [poetry 使用指南](../../../python/包管理与环境/poetry.md)
-- [jupyter 使用指南](../../../python/包管理与环境/jupyter.md)
+- [Python 包管理与环境](../../../工具/py/包管理与环境/index.md)
+- [uv 使用指南](../../../工具/py/包管理与环境/uv.md)
+- [conda 使用指南](../../../工具/py/包管理与环境/conda.md)
+- [poetry 使用指南](../../../工具/py/包管理与环境/poetry.md)
+- [jupyter 使用指南](../../../工具/py/包管理与环境/jupyter.md)
 
 ### 3. AI 与工具集成
 
