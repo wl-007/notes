@@ -6,7 +6,8 @@ import { withI18n } from 'vitepress-i18n';
 import AutoNavPlugin from 'vitepress-auto-nav-sidebar'
 const { nav } = AutoNavPlugin({
   ignoreFolders: [
-    "node_modules","assets", "public", ".vitepress", "code", ".obsidian", "utils",
+    "node_modules","assets", "public", ".vitepress", "code", ".obsidian", 
+    "utils", "dist", "__pycache__"
   ], // 需要排除的一些目录
   ignoreFiles: ['index'], // 需要排除的一些文件
   dirPrefix: '目录：',
@@ -19,7 +20,8 @@ const { nav } = AutoNavPlugin({
 })
 
 const { sidebar } = AutoNavPlugin({
-  ignoreFolders: ["node_modules","assets", "public", ".vitepress", "code", ".obsidian"], // 需要排除的一些目录
+  ignoreFolders: ["node_modules","assets", "public", ".vitepress", "code", 
+    ".obsidian", "dist", "__pycache__"], // 需要排除的一些目录
   ignoreFiles: ['index'], // 需要排除的一些文件
   dirPrefix: '目录：',
   filePrefix: '文件：',
