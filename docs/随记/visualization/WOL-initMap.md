@@ -11,7 +11,7 @@ group:
 
 我们在 `tauri-demo` 里新建的 `@yt/wol` 是一个基于 OpenLayers 的轻量 SDK。它不依赖 React，也不依赖 Vue、Svelte、Angular 等任何 UI 框架。
 
-第一步先做 `initMap`，目标很明确：给一个 DOM 容器，创建 OpenLayers 地图实例，并挂上一个底图。底图现在支持两大类：瓦片地图和单张图片地图。
+第一步先做 `initMap`，目标很明确：给一个 DOM 容器，创建 OpenLayers 地图实例，并挂上一个底图。当前学习切片只保留两类：单张图片地图、GeoJSON 矢量地图。
 
 代码位置：
 
@@ -31,25 +31,7 @@ HG2DMap 老项目的核心初始化在 `E:\workspace\web\HG2DMap\src\map.ts` 的
 4. 再继续创建人员图层、轨迹图层、基站图层、区域图层、绘制图层、热力图图层、测量图层。
 5. 最后把这些图层按顺序 `addLayer` 到地图上。
 
-也就是说，HG2DMap 的初始化不是只创建一张底图，它同时把很多业务图层也初始化好了。WOL SDK 现在先只做第 1 步和第 3 步的一小部分：创建地图、创建 Tile 底图或 ImageStatic 单张图片底图。后续再逐个补业务能力。
-
-## Tile 是地图的什么功能
-
-Tile 可以理解为地图瓦片。
-
-一整张世界地图或城市地图非常大，浏览器不可能一次性加载完整大图。瓦片地图会把地图按缩放级别切成很多小图片：
-
-- `z`：缩放级别，数字越大越清晰，地图越近；
-- `x`：当前缩放级别下，横向第几块瓦片；
-- `y`：当前缩放级别下，纵向第几块瓦片。
-
-常见的瓦片地址长这样：
-
-```txt
-https://tile.openstreetmap.org/{z}/{x}/{y}.png
-```
-
-OpenLayers 会根据当前视图自动计算需要加载哪些瓦片。用户拖动地图时，会加载新的 `x/y`；用户缩放地图时，会加载新的 `z`。
+也就是说，HG2DMap 的初始化不是只创建一张底图，它同时把很多业务图层也初始化好了。WOL SDK 现在先只做第 1 步和第 3 步的一小部分：创建地图、创建 ImageStatic 单张图片底图或 GeoJSON 矢量底图。后续再逐个补业务能力。
 
 ## ImageStatic 是地图的什么功能
 
@@ -76,23 +58,31 @@ ImageStatic 可以理解为单张图片地图。
 
 这样图片左下角是 `[0, 0]`，右上角是 `[1200, 720]`。后续添加人员点位、基站点位、区域多边形时，也可以使用这套图片内部坐标。
 
+## GeoJSON 是地图的什么功能
+
+GeoJSON 可以理解为前端直接加载的点、线、面矢量数据。
+
+它和图片地图的区别：
+
+- ImageStatic：加载的是一张完整图片；
+- GeoJSON：加载的是结构化矢量数据，OpenLayers 会把它解析成很多 `Feature`。
+
+GeoJSON 最常见的数据坐标系是 `EPSG:4326`，也就是经纬度。OpenLayers 渲染互联网地图时，View 默认通常是 `EPSG:3857`，所以读取 GeoJSON 时需要通过 `featureProjection` 转到当前 View 投影。
+
+这和 HG2DMap 老项目里的 `_getGeoJsonLayer` 思路一致：先 XHR 加载 GeoJSON，再 `readFeatures(..., { featureProjection: this.getView().getProjection() })`，最后把 features 添加到 `VectorSource`。
+
+GeoJSON 的几何结构是标准的，但 `properties` 里的字段名不是标准的。阿里云行政区数据里名称字段是 `name`，别的数据可能叫 `NAME`、`fullname`、`title`。所以 SDK 不把标注字段写死，而是通过 `geojson.label.property` 配置。
+
+当前示例先只加载省级数据 `code=100000_full`。城市/区县数据量更大，后续需要下钻或高缩放展示时再单独接入。
+
 ## 数据源可以有哪些
 
-这次 `initMap` 先支持 5 类底图数据源：
+这次 `initMap` 先聚焦 2 类底图数据源：
 
-1. `osm`：OpenStreetMap，默认数据源，不需要 key，适合开发调试。
-2. `xyz`：通用 XYZ 瓦片服务，只要服务地址支持 `{z}/{x}/{y}` 就能接。
-3. `tianditu-vector`：天地图矢量底图，需要天地图 key。
-4. `tianditu-image`：天地图影像底图，需要天地图 key。
-5. `image`：单张图片地图，也就是 OpenLayers 的 `ImageStatic`。
+1. `image`：单张图片地图，也就是 OpenLayers 的 `ImageStatic`。
+2. `geojson`：GeoJSON 矢量地图，也就是 OpenLayers 的 `VectorSource + VectorLayer`。
 
-后续可以继续扩展：
-
-- `WMTS`：标准瓦片服务，政企 GIS 系统里很常见；
-- `WMS`：按范围动态出图的地图服务；
-- `GeoJSON`：前端直接加载点、线、面矢量数据；
-- `KML`：HG2DMap 老项目已经支持的地图数据格式；
-- `VectorTile`：矢量瓦片，适合更高性能和可动态换样式的地图。
+后续如果重新扩展其它地图来源，再单独开新的学习步骤，不放在当前初始化示例里。
 
 ## 最简单用法
 
@@ -110,78 +100,16 @@ import "ol/ol.css";
 
 const { map, view, updateSize, destroy } = initMap({
   target: "map",
-  center: [116.397, 39.908],
-  zoom: 10,
-});
-```
-
-注意：`center` 默认按经纬度传入，也就是 `EPSG:4326`。SDK 内部会转成 OpenLayers 默认的 `EPSG:3857`。
-
-## 使用 XYZ 瓦片
-
-```ts
-import { initMap } from "@yt/wol";
-import "ol/ol.css";
-
-initMap({
-  target: "map",
-  center: [116.397, 39.908],
-  zoom: 12,
-  tile: {
-    type: "xyz",
-    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    maxZoom: 19,
+  minZoom: 0,
+  maxZoom: 8,
+  image: {
+    url: "/floor-1.png",
+    extent: [0, 0, 1200, 720],
   },
 });
 ```
 
-`xyz` 的核心就是 `url`。只要地图服务能按 `{z}/{x}/{y}` 返回图片，就可以接进来。
-
-## 使用天地图矢量底图
-
-```ts
-import { initMap } from "@yt/wol";
-import "ol/ol.css";
-
-initMap({
-  target: "map",
-  center: [116.397, 39.908],
-  zoom: 10,
-  tile: {
-    type: "tianditu-vector",
-    key: "你的天地图key",
-    withAnnotation: true,
-  },
-});
-```
-
-天地图的矢量底图和中文标注是两个图层。`withAnnotation: true` 时，SDK 会自动创建：
-
-- `vec_w`：矢量底图；
-- `cva_w`：中文标注。
-
-## 使用天地图影像底图
-
-```ts
-import { initMap } from "@yt/wol";
-import "ol/ol.css";
-
-initMap({
-  target: "map",
-  center: [116.397, 39.908],
-  zoom: 10,
-  tile: {
-    type: "tianditu-image",
-    key: "你的天地图key",
-    withAnnotation: true,
-  },
-});
-```
-
-影像底图适合看卫星图。`withAnnotation: true` 时，SDK 会自动创建：
-
-- `img_w`：影像底图；
-- `cia_w`：影像中文标注。
+当前阶段建议显式传 `image` 或 `geojson`，这样学习重点集中在图片坐标和矢量数据加载上。
 
 ## 使用单张图片地图
 
@@ -225,15 +153,7 @@ initMap({
 });
 ```
 
-## 使用 HG2DMap 的 EPSG:3857 中心点
-
-HG2DMap 老代码里很多中心点已经是 OpenLayers 的 Web Mercator 坐标，例如：
-
-```ts
-const center = [11584348.7765495814, 3577640.5451782243];
-```
-
-这类坐标不是经纬度，所以要告诉 `initMap` 不要再转换：
+## 使用 GeoJSON 矢量地图
 
 ```ts
 import { initMap } from "@yt/wol";
@@ -241,11 +161,59 @@ import "ol/ol.css";
 
 initMap({
   target: "map",
-  center: [11584348.7765495814, 3577640.5451782243],
-  centerProjection: "EPSG:3857",
-  zoom: 10,
+  center: [104.195, 35.861],
+  zoom: 4,
+  minZoom: 3,
+  maxZoom: 12,
+  geojson: {
+    url: "https://geo.datav.aliyun.com/areas_v3/bound/geojson?code=100000_full",
+    fillColor: "rgba(34, 197, 94, 0.14)",
+    strokeColor: "rgba(21, 128, 61, 0.95)",
+    strokeWidth: 1.2,
+    padding: [24, 24, 24, 24],
+    label: {
+      enabled: true,
+      property: "name",
+      font: "14px sans-serif",
+      color: "#14532d",
+      strokeColor: "rgba(255, 255, 255, 0.95)",
+      strokeWidth: 4,
+    },
+  },
+  onProgress: (progress) => {
+    console.log("GeoJSON 加载进度", progress.percent);
+  },
+  onLoaded: () => {
+    console.log("GeoJSON 加载完成");
+  },
+  onError: (error) => {
+    console.error(error.message);
+  },
 });
 ```
+
+几个关键参数：
+
+- `geojson`：可以传单个配置对象，也可以传数组加载多层 GeoJSON；
+- `url`：GeoJSON 地址；
+- `dataProjection`：GeoJSON 原始坐标系，默认 `EPSG:4326`；
+- `fit`：加载完成后是否自动适配到数据范围，默认 `true`；
+- `fillColor`：面填充色；
+- `strokeColor`：线/面描边色；
+- `strokeWidth`：线/面描边宽度。
+- `label.enabled`：是否显示标注；
+- `label.property`：从 `properties` 里读取哪个字段作为标注文字，默认 `name`；
+- `label.minZoom` / `label.maxZoom`：控制标注在哪些缩放级别显示。
+
+城市级 GeoJSON 数据量更大，低缩放时拖动会更容易卡。当前示例只加载省级数据，先保证初始化地图和省名标注的基础体验。
+
+当前 `tauri-demo` 的 `WolShowcase` 页面已经接入了这个示例，按钮名是 `GeoJSON 中国`。
+
+## 坐标注意
+
+图片地图使用图片内部的平面坐标，例如 `[600, 360]`。GeoJSON 通常使用经纬度 `EPSG:4326`，SDK 读取时会把数据转换到当前 View 投影。
+
+后续如果重新接入在线瓦片，再单独补充 `EPSG:4326` 和 `EPSG:3857` 中心点转换示例。
 
 ## 返回值怎么用
 
