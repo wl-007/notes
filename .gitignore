@@ -2,6 +2,7 @@
 **/.vitepress/cache
 **/dist
 **/cache
+graphify-out
 
 # macOS
 .DS_Store
