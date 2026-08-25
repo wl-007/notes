@@ -522,3 +522,101 @@ SQL 服务不再硬编码 `sqlite:demo.db`，每次连接前读取当前设置�
 `src-tauri/capabilities/default.json` 的 `windows` 需要同时包含 `main` 和 `demo-settings-window`，否则 JS 创建的新窗口没有 store、dialog、sql、fs-pro 等插件权限。
 
 注意 `sql:default` 只包含 `load`、`select`、`close`，不包含 `execute`；要执行 INSERT/UPDATE/DELETE 必须在 capabilities 里额外加 `sql:allow-execute`。
+
+## Log 插件
+
+### 默认位置
+
+官方 `tauri-plugin-log` 的默认目标包含 `Stdout` 和 `LogDir` 两个：终端直接打印，同时写入系统推荐的日志目录。
+
+Windows 下 `LogDir` 对应：
+
+```text
+%LOCALAPPDATA%\{bundleIdentifier}\logs
+```
+
+本项目 identifier 是 `com.it.wl.tauri_demo`，所以默认目录是：
+
+```text
+C:\Users\<用户名>\AppData\Local\com.it.wl.tauri_demo\logs
+```
+
+`LogDir { file_name: None }` 时文件名默认取应用名，也就是 `tauri-demo.log`。想指定路径时可以用 `TargetKind::Folder { path, file_name }`。
+
+### 按日期拆分
+
+插件内置的轮转是“按文件大小”轮转，不是按日期。要每天一个文件，需要借助 `TargetKind::Dispatch` + `fern::DateBased`。
+
+`DateBased` 被 `date-based` feature 保护，需要手动给 fern 开启：
+
+```toml
+fern = { version = "0.7", features = ["date-based"] }
+```
+
+注册方式：
+
+```rust
+tauri_plugin_log::Builder::new()
+    .clear_targets()
+    .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout))
+    .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Webview))
+    .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Dispatch(
+        tauri_plugin_log::fern::Dispatch::new().chain(
+            tauri_plugin_log::fern::DateBased::new(
+                format!("{}\\", log_dir.display()),
+                "%Y-%m-%d-tauri-demo.log",
+            ),
+        ),
+    )))
+    .build()
+```
+
+`DateBased::new(prefix, suffix)` 会把前缀和后缀直接拼起来，所以前缀目录末尾要带分隔符。默认使用本地时区，最终文件形如 `2026-08-26-tauri-demo.log`；跨天写入第一条日志时会自动切换到新文件。
+
+### 官方大小轮转
+
+如果不按日期拆分，插件默认配置是：
+
+- `RotationStrategy::KeepOne`：文件达到上限后直接丢弃旧内容，只保留最新文件。
+- `KeepAll`：达到上限后把当前文件重命名为 `tauri-demo_YYYY-MM-DD_HH-MM-SS.log`，保留全部历史。
+- `KeepSome(n)`：保留最近 n 个归档文件。
+- `max_file_size`：默认 40000 字节。
+- `FileOpenStrategy`：`Append` 追加上次会话内容，`Rotate` 每次启动轮转。
+
+### 前端与 Rust 两种输出
+
+JS 侧 API：
+
+```ts
+import { trace, debug, info, warn, error } from "@tauri-apps/plugin-log";
+
+await info("来自前端的日志");
+```
+
+开启 `Webview` target 后，`attachConsole()` 会把插件收到的日志转发到浏览器控制台：
+
+```ts
+import { attachConsole } from "@tauri-apps/plugin-log";
+
+const unlisten = await attachConsole();
+```
+
+Rust 侧使用 `log` crate：
+
+```rust
+log::info!("来自 Rust 的日志");
+```
+
+本项目在 `run()` 启动时用 `log::info!("日志插件已就绪")` 演示 Rust 侧日志；页面路径用 `appLogDir()` 拼上本地日期得到，不需要额外加 Rust 命令。
+
+### 权限
+
+capabilities 只需要：
+
+```json
+{
+  "permissions": ["log:default"]
+}
+```
+
+`log:default` 只包含 `allow-log`，不会放开任何文件系统权限；日志文件本身由 Rust 插件直接写入系统日志目录，不需要给前端开 fs scope。
